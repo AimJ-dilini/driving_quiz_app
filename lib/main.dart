@@ -1,8 +1,19 @@
+import 'package:driving_quiz_app/models/question.dart';
+import 'package:driving_quiz_app/screens/add_question_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'screens/quiz_screen.dart';
 import 'screens/learning_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDocDir.path);
+
+  Hive.registerAdapter(QuestionAdapter());
+  await Hive.openBox<Question>('questionsBox');
+
   runApp(const MyApp());
 }
 
@@ -37,6 +48,14 @@ class HomeScreen extends StatelessWidget {
               child: const Text('Start Learning Mode'),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const LearningScreen()));
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text("Add Question"),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddQuestionScreen()));
               },
             ),
           ],

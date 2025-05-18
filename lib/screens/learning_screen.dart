@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:driving_quiz_app/data/question_data.dart';
 import 'package:flutter/material.dart';
 import '../data/questions.dart';
 import '../models/question.dart';
@@ -16,21 +19,19 @@ class _LearningScreenState extends State<LearningScreen> {
   bool reveal = false;
   bool reviewOnly = false;
   bool shuffle = false;
+  // List<Question> getAllCombinedQuestions() => [...questions, ...getAllQuestions()];
 
   @override
   void initState() {
     super.initState();
-    learningList = List<Question>.from(questions);
+    learningList = [...questions, ...getAllQuestions()];
   }
 
   void toggleShuffle() {
     setState(() {
       shuffle = !shuffle;
-      if (shuffle) {
-        learningList.shuffle(Random());
-      } else {
-        learningList = List<Question>.from(questions);
-      }
+      final allQuestions = [...questions, ...getAllQuestions()];
+      learningList = shuffle ? (allQuestions..shuffle(Random())) : allQuestions;
       currentIndex = 0;
       reveal = false;
     });
@@ -39,11 +40,11 @@ class _LearningScreenState extends State<LearningScreen> {
   void toggleReviewOnly() {
     setState(() {
       reviewOnly = !reviewOnly;
+      final allQuestions = [...questions, ...getAllQuestions()];
       if (reviewOnly) {
-        learningList = questions.where((q) => q.markedForReview).toList();
+        learningList = allQuestions.where((q) => q.markedForReview).toList();
       } else {
-        learningList = List<Question>.from(questions);
-        if (shuffle) learningList.shuffle(Random());
+        learningList = shuffle ? (allQuestions..shuffle(Random())) : allQuestions;
       }
       currentIndex = 0;
       reveal = false;
@@ -52,8 +53,7 @@ class _LearningScreenState extends State<LearningScreen> {
 
   void toggleMarkReview() {
     setState(() {
-      learningList[currentIndex].markedForReview =
-          !learningList[currentIndex].markedForReview;
+      learningList[currentIndex].markedForReview = !learningList[currentIndex].markedForReview;
     });
   }
 
@@ -80,12 +80,7 @@ class _LearningScreenState extends State<LearningScreen> {
   @override
   Widget build(BuildContext context) {
     if (learningList.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Learning Mode')),
-        body: const Center(
-          child: Text('No questions available in this mode.'),
-        ),
-      );
+      return Scaffold(appBar: AppBar(title: const Text('Learning Mode')), body: const Center(child: Text('No questions available in this mode.')));
     }
 
     final question = learningList[currentIndex];
@@ -94,16 +89,8 @@ class _LearningScreenState extends State<LearningScreen> {
       appBar: AppBar(
         title: const Text('Learning Mode'),
         actions: [
-          IconButton(
-            icon: Icon(shuffle ? Icons.shuffle_on : Icons.shuffle),
-            tooltip: 'Toggle Shuffle',
-            onPressed: toggleShuffle,
-          ),
-          IconButton(
-            icon: Icon(reviewOnly ? Icons.bookmark : Icons.bookmark_border),
-            tooltip: 'Toggle Review Mode',
-            onPressed: toggleReviewOnly,
-          ),
+          IconButton(icon: Icon(shuffle ? Icons.shuffle_on : Icons.shuffle), tooltip: 'Toggle Shuffle', onPressed: toggleShuffle),
+          IconButton(icon: Icon(reviewOnly ? Icons.bookmark : Icons.bookmark_border), tooltip: 'Toggle Review Mode', onPressed: toggleReviewOnly),
         ],
       ),
       body: Padding(
@@ -111,48 +98,31 @@ class _LearningScreenState extends State<LearningScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Question ${currentIndex + 1} of ${learningList.length}',
-              style: const TextStyle(fontSize: 16),
-            ),
+            Text('Question ${currentIndex + 1} of ${learningList.length}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 10),
-            Image.asset(question.imagePath, height: 200),
+            // Image.asset(question.imagePath ?? '', height: 200),
+            if (question.imagePath != null)
+              // Image.asset(question.imagePath!, height: 200)
+              question.imagePath != null && question.imagePath!.startsWith('assets/')
+                  ? Image.asset(question.imagePath!, height: 200)
+                  : Image.file(File(question.imagePath!), height: 200)
+            else
+              const SizedBox(height: 10),
+
             const SizedBox(height: 20),
-            if (reveal)
-              Text(
-                'Answer: ${question.options[question.correctIndex]}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+            if (reveal) Text('Answer: ${question.options[question.correctIndex]}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-            if (!reveal)
-              ElevatedButton(
-                onPressed: showAnswer,
-                child: const Text('Reveal Answer'),
-              ),
+            if (!reveal) ElevatedButton(onPressed: showAnswer, child: const Text('Reveal Answer')),
             if (reveal) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: back,
-                    child: const Text('Back'),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: next,
-                    child: const Text('Next'),
-                  ),
-                ],
+                children: [ElevatedButton(onPressed: back, child: const Text('Back')), const SizedBox(width: 10), ElevatedButton(onPressed: next, child: const Text('Next'))],
               ),
               const SizedBox(height: 10),
               TextButton.icon(
                 onPressed: toggleMarkReview,
-                icon: Icon(question.markedForReview
-                    ? Icons.bookmark_added
-                    : Icons.bookmark_add_outlined),
-                label: Text(question.markedForReview
-                    ? 'Marked for Review'
-                    : 'Mark for Review'),
+                icon: Icon(question.markedForReview ? Icons.bookmark_added : Icons.bookmark_add_outlined),
+                label: Text(question.markedForReview ? 'Marked for Review' : 'Mark for Review'),
               ),
             ],
           ],

@@ -9,7 +9,10 @@ import 'package:hive/hive.dart';
 import '../models/question.dart';
 
 class AddQuestionScreen extends StatefulWidget {
-  const AddQuestionScreen({super.key});
+  Question? editingQuestion;
+  int? indexToEdit;
+
+  AddQuestionScreen({super.key, this.editingQuestion, this.indexToEdit});
 
   @override
   State<AddQuestionScreen> createState() => _AddQuestionScreenState();
@@ -18,8 +21,7 @@ class AddQuestionScreen extends StatefulWidget {
 class _AddQuestionScreenState extends State<AddQuestionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _questionTextController = TextEditingController();
-  final List<TextEditingController> _optionControllers =
-      List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _optionControllers = List.generate(4, (_) => TextEditingController());
 
   int correctIndex = 0;
   File? imageFile;
@@ -41,9 +43,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
     if (_formKey.currentState!.validate()) {
       final options = _optionControllers.map((c) => c.text).toList();
       final question = Question(
-        questionText: _questionTextController.text.isEmpty
-            ? null
-            : _questionTextController.text,
+        questionText: _questionTextController.text.isEmpty ? null : _questionTextController.text,
         imagePath: imageFile?.path,
         options: options,
         correctIndex: correctIndex,
@@ -53,9 +53,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
       final box = Hive.box<Question>('questionsBox');
       await box.add(question);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Question added successfully!')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Question added successfully!')));
 
       Navigator.pop(context);
     }
@@ -81,27 +79,15 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
           child: Column(
             children: [
               const Text('Optional: Enter question text'),
-              TextFormField(
-                controller: _questionTextController,
-                decoration: const InputDecoration(labelText: 'Question Text'),
-              ),
+              TextFormField(controller: _questionTextController, decoration: const InputDecoration(labelText: 'Question Text')),
               const SizedBox(height: 10),
-              if (imageFile != null)
-                Image.file(imageFile!, height: 150),
+              if (imageFile != null) Image.file(imageFile!, height: 150),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: () => pickImage(ImageSource.camera),
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text('Camera'),
-                  ),
+                  ElevatedButton.icon(onPressed: () => pickImage(ImageSource.camera), icon: const Icon(Icons.camera_alt), label: const Text('Camera')),
                   const SizedBox(width: 10),
-                  ElevatedButton.icon(
-                    onPressed: () => pickImage(ImageSource.gallery),
-                    icon: const Icon(Icons.photo),
-                    label: const Text('Gallery'),
-                  ),
+                  ElevatedButton.icon(onPressed: () => pickImage(ImageSource.gallery), icon: const Icon(Icons.photo), label: const Text('Gallery')),
                 ],
               ),
               const SizedBox(height: 20),
@@ -110,17 +96,13 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
                 TextFormField(
                   controller: _optionControllers[i],
                   decoration: InputDecoration(labelText: 'Option ${i + 1}'),
-                  validator: (val) =>
-                      val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 ),
               const SizedBox(height: 10),
               DropdownButtonFormField<int>(
                 value: correctIndex,
                 decoration: const InputDecoration(labelText: 'Correct Option'),
-                items: List.generate(4, (i) => DropdownMenuItem(
-                  value: i,
-                  child: Text('Option ${i + 1}'),
-                )),
+                items: List.generate(4, (i) => DropdownMenuItem(value: i, child: Text('Option ${i + 1}'))),
                 onChanged: (val) {
                   setState(() {
                     correctIndex = val!;
@@ -128,10 +110,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: saveQuestion,
-                child: const Text('Save Question'),
-              )
+              ElevatedButton(onPressed: saveQuestion, child: const Text('Save Question')),
             ],
           ),
         ),

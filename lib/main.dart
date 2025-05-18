@@ -1,5 +1,6 @@
 import 'package:driving_quiz_app/models/question.dart';
 import 'package:driving_quiz_app/screens/add_question_screen.dart';
+import 'package:driving_quiz_app/screens/manage_questions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -55,7 +56,15 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: const Text("Add Question"),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddQuestionScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => AddQuestionScreen()));
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.list_alt),
+              label: const Text("Manage Questions"),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageQuestionsScreen()));
               },
             ),
           ],

@@ -9,10 +9,10 @@ import 'package:hive/hive.dart';
 import '../models/question.dart';
 
 class AddQuestionScreen extends StatefulWidget {
-  Question? editingQuestion;
-  int? indexToEdit;
+  final Question? editingQuestion;
+  final int? indexToEdit;
 
-  AddQuestionScreen({super.key, this.editingQuestion, this.indexToEdit});
+  const AddQuestionScreen({super.key, this.editingQuestion, this.indexToEdit});
 
   @override
   State<AddQuestionScreen> createState() => _AddQuestionScreenState();
